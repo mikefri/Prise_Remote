@@ -3,190 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Plug Control</title>
+    <title>Prise Control Ultimate</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: radial-gradient(at top left, #f8fafc, #f1f5f9 50%, #e2e8f0); color: #334155; font-family: 'Inter', sans-serif; min-height: 100vh; }
-        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(15px); border-radius: 28px; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 30px rgba(148, 163, 184, 0.1); transition: all 0.3s ease; }
-        .is-on { background: rgba(255, 255, 255, 0.95) !important; border-color: #10b981 !important; box-shadow: 0 0 20px rgba(16, 185, 129, 0.2) !important; }
-        .card-offline { opacity: 0.5; filter: grayscale(1); pointer-events: none; }
-        .label-text { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; }
-        input[type="range"] { -webkit-appearance: none; height: 6px; border-radius: 5px; background: #cbd5e1; width: 100%; outline: none; }
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #10b981; cursor: pointer; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        body { background: #f1f5f9; color: #334155; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border-radius: 24px; border: 1px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .is-on { border-color: #10b981 !important; box-shadow: 0 0 20px rgba(16, 185, 129, 0.15) !important; }
+        .label-text { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; }
     </style>
 </head>
-<body class="p-4 flex justify-center items-start">
+<body class="p-4 flex justify-center items-start min-h-screen">
 
-    <div id="custom-confirm" class="fixed inset-0 z-[10000] hidden flex items-center justify-center p-6 bg-slate-950/40 backdrop-blur-sm">
-        <div class="glass p-8 max-w-xs w-full text-center">
-            <h3 id="confirm-title" class="text-xl font-black mb-6 uppercase tracking-tight">Action ?</h3>
-            <div class="flex gap-3">
-                <button id="confirm-yes" class="flex-1 py-4 bg-emerald-500 text-white rounded-2xl font-black uppercase text-[10px]">Confirmer</button>
-                <button id="confirm-no" class="flex-1 py-4 bg-slate-100 rounded-2xl font-black uppercase text-[10px]">Annuler</button>
+    <div class="w-full max-w-md">
+        <div id="config-panel" class="hidden glass p-6 mb-6 border-orange-200 bg-orange-50/50">
+            <h2 class="text-sm font-black uppercase mb-4 text-orange-700">Configuration API Tuya</h2>
+            <div class="space-y-3">
+                <input type="text" id="cfg-id" placeholder="Access ID" class="w-full p-3 rounded-xl border-none ring-1 ring-slate-200 text-sm">
+                <input type="password" id="cfg-secret" placeholder="Access Secret" class="w-full p-3 rounded-xl border-none ring-1 ring-slate-200 text-sm">
+                <button onclick="saveConfig()" class="w-full py-3 bg-orange-500 text-white rounded-xl font-bold text-xs uppercase">Enregistrer & Actualiser</button>
             </div>
         </div>
-    </div>
 
-    <div class="w-full max-w-xl">
-        <header class="py-8 flex justify-between items-center">
-            <div>
-                <h1 class="text-4xl font-black italic tracking-tighter bg-gradient-to-br from-emerald-500 to-teal-700 bg-clip-text text-transparent">Prise Connect</h1>
-                <p class="label-text mt-1 text-emerald-600">Gestion Énergie</p>
-            </div>
+        <header class="py-6 flex justify-between items-center">
+            <h1 class="text-3xl font-black italic tracking-tighter text-slate-800">Prises<span class="text-emerald-500">.</span></h1>
             <div class="flex gap-2">
-                <button onclick="masterAction(false)" class="p-4 glass text-red-500 active:scale-90 transition">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                <button onclick="document.getElementById('config-panel').classList.toggle('hidden')" class="p-3 glass text-slate-400">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></svg>
                 </button>
-                <button onclick="loadDevices()" class="p-4 glass text-emerald-500 active:rotate-180 transition">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                </button>
+                <button onclick="loadDevices()" class="p-3 glass text-emerald-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></button>
             </div>
         </header>
 
-        <main id="container" class="space-y-4"></main>
+        <main id="container" class="space-y-4 text-center">
+            <p class="text-slate-400 text-sm py-10">Chargement...</p>
+        </main>
     </div>
 
     <script>
-        let devicesCache = [];
+        // --- GESTION CONFIG ---
+        function checkConfig() {
+            const id = localStorage.getItem('tuya_id');
+            const secret = localStorage.getItem('tuya_secret');
+            if(!id || !secret) {
+                document.getElementById('config-panel').classList.remove('hidden');
+            }
+            return id && secret;
+        }
 
+        function saveConfig() {
+            localStorage.setItem('tuya_id', document.getElementById('cfg-id').value);
+            localStorage.setItem('tuya_secret', document.getElementById('cfg-secret').value);
+            location.reload();
+        }
+
+        // --- API & LOGIQUE ---
         async function api(body) {
             try {
                 const res = await fetch('/api/control', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ...body, accessId: localStorage.getItem('tuya_id'), accessSecret: localStorage.getItem('tuya_secret') })
+                    body: JSON.stringify({ 
+                        ...body, 
+                        accessId: localStorage.getItem('tuya_id'), 
+                        accessSecret: localStorage.getItem('tuya_secret') 
+                    })
                 });
                 return await res.json();
             } catch (e) { return { success: false }; }
         }
 
-async function loadDevices() {
-    const res = await api({ action: 'listDevices' });
-    console.log("Appareils reçus :", res); // Regardez ici dans F12 pour voir les 'category'
-
-    if(res.success) {
-        // On élargit le filtre à 'cz', 'pc', 'kg' et on garde la recherche par nom
-        devicesCache = res.result.filter(d => {
-            const category = d.category ? d.category.toLowerCase() : '';
-            const name = d.name.toLowerCase();
-            return ['cz', 'pc', 'kg', 'jsh'].includes(category) || 
-                   name.includes('prise') || 
-                   name.includes('plug') || 
-                   name.includes('socket');
-        }).sort((a, b) => (a.online === b.online) ? a.name.localeCompare(b.name) : (a.online ? -1 : 1));
-        
-        if (devicesCache.length === 0) {
-            document.getElementById('container').innerHTML = `
-                <div class="glass p-8 text-center">
-                    <p class="text-slate-500 font-bold">Aucune prise trouvée.</p>
-                    <p class="text-[10px] uppercase mt-2">Appareils trouvés au total : ${res.result.length}</p>
-                </div>`;
-        } else {
-            document.getElementById('container').innerHTML = devicesCache.map(d => render(d)).join('');
-            devicesCache.forEach(d => { if(d.online) syncStatus(d.id); });
-        }
-    }
-}
-
-        function render(d) {
-            return `
-            <div class="glass p-6 ${!d.online ? 'card-offline' : ''}" id="card-${d.id}">
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center gap-4">
-                        <div class="p-3 rounded-2xl bg-emerald-50 text-emerald-600">
-                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+        async function loadDevices() {
+            if(!checkConfig()) return;
+            const res = await api({ action: 'listDevices' });
+            if(res.success) {
+                // On affiche TOUT sans filtre pour être sûr de trouver vos appareils
+                const devices = res.result;
+                document.getElementById('container').innerHTML = devices.map(d => `
+                    <div class="glass p-5 flex flex-col gap-4 text-left ${!d.online ? 'opacity-50' : ''}" id="card-${d.id}">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="font-bold text-slate-800">${d.name}</h3>
+                                <p class="text-[9px] text-slate-400 uppercase font-black">${d.category} | ${d.online ? 'En ligne' : 'Hors-ligne'}</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="sw-${d.id}" onchange="toggleDevice('${d.id}', this.checked)" class="sr-only peer">
+                                <div class="w-12 h-6 bg-slate-200 rounded-full peer peer-checked:bg-emerald-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-6"></div>
+                            </label>
                         </div>
-                        <div>
-                            <h3 class="font-bold text-lg leading-tight">${d.name}</h3>
-                            <span id="badge-status-${d.id}" class="text-[9px] font-black uppercase text-slate-400">Vérification...</span>
+                        
+                        <div class="pt-3 border-t border-slate-100">
+                             <div class="flex justify-between items-center mb-1">
+                                <span class="label-text">Minuteur (Secondes)</span>
+                                <span id="val-${d.id}" class="text-xs font-bold text-emerald-600">0</span>
+                             </div>
+                             <input type="range" class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-500" 
+                                    min="0" max="3600" step="60" value="0"
+                                    oninput="document.getElementById('val-${d.id}').innerText = this.value"
+                                    onchange="sendCountdown('${d.id}', this.value)">
                         </div>
                     </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="sw-${d.id}" onchange="togglePlug('${d.id}', this.checked)" class="sr-only peer">
-                        <div class="w-14 h-7 bg-slate-200 rounded-full peer peer-checked:bg-emerald-500 after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-7 shadow-inner"></div>
-                    </label>
-                </div>
-
-                <div class="mt-6 pt-4 border-t border-slate-100">
-                    <div class="flex justify-between mb-2">
-                        <span class="label-text">Compte à rebours</span>
-                        <span id="timer-display-${d.id}" class="text-[10px] font-bold text-emerald-600">OFF</span>
-                    </div>
-                    <input type="range" id="cd-${d.id}" min="0" max="3600" step="60" value="0" 
-                        oninput="updateTimerDisplay('${d.id}', this.value)"
-                        onchange="setCountdown('${d.id}', this.value)">
-                    <div class="flex justify-between mt-1">
-                        <span class="text-[8px] text-slate-400 font-bold uppercase">0 min</span>
-                        <span class="text-[8px] text-slate-400 font-bold uppercase">60 min</span>
-                    </div>
-                </div>
-            </div>`;
+                `).join('');
+                
+                // Sync status initial
+                devices.forEach(d => { if(d.online) syncStatus(d.id); });
+            }
         }
 
         async function syncStatus(id) {
             const res = await api({ action: 'getStatus', deviceId: id });
             if(res.success && res.result) {
-                const s = res.result;
-                const sw = s.find(x => x.code === 'switch_1' || x.code === 'switch');
+                const sw = res.result.find(x => x.code.includes('switch'));
                 if(sw) {
                     document.getElementById(`sw-${id}`).checked = sw.value;
-                    updateVisual(id, sw.value);
+                    if(sw.value) document.getElementById(`card-${id}`).classList.add('is-on');
                 }
-                const cd = s.find(x => x.code === 'countdown_1' || x.code === 'countdown');
-                if(cd && cd.value > 0) {
-                    updateTimerDisplay(id, cd.value);
-                    document.getElementById(`cd-${id}`).value = cd.value;
+                const cd = res.result.find(x => x.code.includes('countdown'));
+                if(cd) {
+                    document.getElementById(`val-${id}`).innerText = cd.value;
                 }
             }
         }
 
-        function updateVisual(id, isOn) {
+        async function toggleDevice(id, state) {
             const card = document.getElementById(`card-${id}`);
-            const badge = document.getElementById(`badge-status-${id}`);
-            if(!card || !badge) return;
-            isOn ? card.classList.add('is-on') : card.classList.remove('is-on');
-            badge.innerText = isOn ? "● Actif" : "○ Inactif";
-            badge.className = `text-[9px] font-black uppercase ${isOn ? 'text-emerald-500' : 'text-slate-400'}`;
-        }
-
-        async function togglePlug(id, state) {
-            updateVisual(id, state);
+            state ? card.classList.add('is-on') : card.classList.remove('is-on');
             await api({ action: 'send', deviceId: id, code: 'switch_1', value: state });
         }
 
-        function updateTimerDisplay(id, seconds) {
-            const display = document.getElementById(`timer-display-${id}`);
-            if(seconds == 0) {
-                display.innerText = "OFF";
-            } else {
-                const mins = Math.floor(seconds / 60);
-                display.innerText = mins + " MIN";
-            }
-        }
-
-        async function setCountdown(id, seconds) {
-            await api({ action: 'send', deviceId: id, code: 'countdown_1', value: parseInt(seconds) });
-        }
-
-        async function masterAction(turnOn) {
-            const modal = document.getElementById('custom-confirm');
-            document.getElementById('confirm-title').innerText = turnOn ? "Tout activer ?" : "Tout éteindre ?";
-            modal.classList.remove('hidden');
-            
-            const choice = await new Promise(r => {
-                document.getElementById('confirm-yes').onclick = () => r(true);
-                document.getElementById('confirm-no').onclick = () => r(false);
-            });
-            
-            modal.classList.add('hidden');
-            if(choice) {
-                devicesCache.forEach(d => {
-                    if(d.online) {
-                        togglePlug(d.id, turnOn);
-                        document.getElementById(`sw-${d.id}`).checked = turnOn;
-                    }
-                });
-            }
+        async function sendCountdown(id, val) {
+            await api({ action: 'send', deviceId: id, code: 'countdown_1', value: parseInt(val) });
         }
 
         window.onload = loadDevices;
