@@ -32,9 +32,9 @@ export default async function handler(req, res) {
                 const devices = rawList.result.devices || rawList.result || [];
                 // Filtrage selon tes instructions (Calex, Light, et catégories Tuya)
                 const lightsOnly = devices.filter(d => 
-                    ['dj', 'dd', 'fwl', 'tdq'].includes(d.category) || 
-                    d.name.toLowerCase().includes('calex') || 
-                    d.name.toLowerCase().includes('light')
+                    ['cz', 'pc'].includes(d.category) || 
+                    d.name.toLowerCase().includes('SP21')  
+                    
                 );
                 response = { success: true, result: lightsOnly };
                 break;
