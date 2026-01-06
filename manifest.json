@@ -1,0 +1,19 @@
+{
+  "name": "Prises Remote",
+  "short_name": "Prises",
+  "description": "Gestion intelligente des prises connectées",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f0f3f7",
+  "theme_color": "#3498db",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "lifestyle"],
+  "lang": "fr-FR"
+}
