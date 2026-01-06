@@ -60,18 +60,33 @@
             } catch (e) { return { success: false }; }
         }
 
-        async function loadDevices() {
-            const res = await api({ action: 'listDevices' });
-            if(res.success) {
-                // Filtrer pour ne garder que les prises (category 'cz') ou appareils avec "prise" dans le nom
-                devicesCache = res.result
-                    .filter(d => d.category === 'cz' || d.name.toLowerCase().includes('prise') || d.name.toLowerCase().includes('plug'))
-                    .sort((a, b) => (a.online === b.online) ? a.name.localeCompare(b.name) : (a.online ? -1 : 1));
-                
-                document.getElementById('container').innerHTML = devicesCache.map(d => render(d)).join('');
-                devicesCache.forEach(d => { if(d.online) syncStatus(d.id); });
-            }
+async function loadDevices() {
+    const res = await api({ action: 'listDevices' });
+    console.log("Appareils reçus :", res); // Regardez ici dans F12 pour voir les 'category'
+
+    if(res.success) {
+        // On élargit le filtre à 'cz', 'pc', 'kg' et on garde la recherche par nom
+        devicesCache = res.result.filter(d => {
+            const category = d.category ? d.category.toLowerCase() : '';
+            const name = d.name.toLowerCase();
+            return ['cz', 'pc', 'kg', 'jsh'].includes(category) || 
+                   name.includes('prise') || 
+                   name.includes('plug') || 
+                   name.includes('socket');
+        }).sort((a, b) => (a.online === b.online) ? a.name.localeCompare(b.name) : (a.online ? -1 : 1));
+        
+        if (devicesCache.length === 0) {
+            document.getElementById('container').innerHTML = `
+                <div class="glass p-8 text-center">
+                    <p class="text-slate-500 font-bold">Aucune prise trouvée.</p>
+                    <p class="text-[10px] uppercase mt-2">Appareils trouvés au total : ${res.result.length}</p>
+                </div>`;
+        } else {
+            document.getElementById('container').innerHTML = devicesCache.map(d => render(d)).join('');
+            devicesCache.forEach(d => { if(d.online) syncStatus(d.id); });
         }
+    }
+}
 
         function render(d) {
             return `
